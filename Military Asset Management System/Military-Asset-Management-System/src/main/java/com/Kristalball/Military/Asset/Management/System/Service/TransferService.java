@@ -51,20 +51,17 @@ public class TransferService {
     private AuditSerive auditSerive;
 
     public TransferEntity createTransfer(TransferEntity transferEntity, HttpServletRequest request){
-        if (transferEntity.getToBaseId() == null || transferEntity.getFromBaseId() == null || transferEntity.getAssertId() == null) {
-            throw new IllegalArgumentException("Base ID or Asset ID cannot be null");
+        if (transferEntity.getToBaseId() == null) {
+            throw new IllegalArgumentException("toBaseId cannot be null");
         }
-
-        if (!baseRepo.existsById(transferEntity.getToBaseId()) || !baseRepo.existsById(transferEntity.getFromBaseId())) {
-            throw new IllegalArgumentException("Invalid base ID");
+        if (transferEntity.getFromBaseId() == null) {
+            throw new IllegalArgumentException("fromBaseId cannot be null");
         }
-
-        if (!assertRepo.existsById(transferEntity.getAssertId())) {
-            throw new IllegalArgumentException("Invalid asset ID");
+        if (!baseRepo.existsById(transferEntity.getToBaseId())) {
+            throw new IllegalArgumentException("Invalid toBaseId: " + transferEntity.getToBaseId());
         }
-
-        if (transferEntity.getQuantity() <= 0) {
-            throw new IllegalArgumentException("Quantity must be positive");
+        if (!baseRepo.existsById(transferEntity.getFromBaseId())) {
+            throw new IllegalArgumentException("Invalid fromBaseId: " + transferEntity.getFromBaseId());
         }
 
         //Managing the Transferring Of data's
@@ -90,6 +87,12 @@ public class TransferService {
         return repo.findAll(spec);
     }
 
+    public List<TransferEntity> getListOfTransferEntity(HttpServletRequest request){
+        String username = authUtils.getUsernameFromRequest(request);
+        auditSerive.log("/Transfer", username, "READ", LocalDate.now());
+        return repo.findAll();
+
+    }
     public List<TransferDTO> getTransferDTO(HttpServletRequest request){
         String username = authUtils.getUsernameFromRequest(request);
         auditSerive.log("/Transfer", username, "CREATE", LocalDate.now());

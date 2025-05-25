@@ -29,7 +29,7 @@ public class JwtUtil {
                 .subject(userDetails.getUsername())
                 .claim("role", role)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 90)) // 90 days
                 .signWith(SECRET_KEY, Jwts.SIG.HS256)
                 .compact();
     }

@@ -45,6 +45,12 @@ public class TransferController {
         return new ResponseEntity<>(getFilteredList, HttpStatus.OK);
     }
 
+    @GetMapping("getTransfer")
+    public ResponseEntity<List<TransferEntity>> getTransferEntity(HttpServletRequest request){
+        List<TransferEntity> getTransferEntity = service.getListOfTransferEntity(request);
+        return new ResponseEntity<>(getTransferEntity, HttpStatus.OK);
+    }
+
     @GetMapping("/getTransferDTO")
     public ResponseEntity<List<TransferDTO>> getListOfTransferDto(HttpServletRequest request){
         List<TransferDTO> getListOfTransferDTO = service.getTransferDTO(request);
@@ -52,8 +58,16 @@ public class TransferController {
     }
 
     @PostMapping("/addTransfer")
-    public ResponseEntity<TransferEntity> getCreatedTransaction(@RequestBody TransferEntity transfer, HttpServletRequest request){
-        TransferEntity getTransactionEnd = service.createTransfer(transfer, request);
-        return new ResponseEntity<>(getTransactionEnd, HttpStatus.CREATED);
+    public ResponseEntity<?> getCreatedTransaction(@RequestBody TransferEntity transfer, HttpServletRequest request) {
+        try {
+            transfer.setTransferDate(LocalDate.now());
+            TransferEntity createdTransfer = service.createTransfer(transfer, request);
+            return new ResponseEntity<>(createdTransfer, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+
+            return new ResponseEntity<>("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

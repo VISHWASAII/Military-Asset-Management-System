@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,12 +25,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(csrf -> csrf.disable()) // Updated way to disable CSRF
+                .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/purchases/**").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers("/transfers/**").hasAnyRole("ADMIN")
-                        .requestMatchers("/assignments/**", "/expenditures/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/auth/**", "/base/**", "/asset/**", "/audit/**").permitAll()
+                        .requestMatchers("/dashboard/**").hasAnyRole("ADMIN", "BASE_COMMANDER", "LOGISTICS_OFFICER")
+                        .requestMatchers("/purchases/**").hasAnyRole("ADMIN", "LOGISTICS_OFFICER")
+                        .requestMatchers("/transfers/**").hasAnyRole("ADMIN", "LOGISTICS_OFFICER")
+                        .requestMatchers("/assignments/**").hasAnyRole("ADMIN", "BASE_COMMANDER")
+                        .requestMatchers("/expenditures/**").hasAnyRole("ADMIN", "BASE_COMMANDER")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
